@@ -18,12 +18,12 @@ func main() {
 
 	ch := make(chan string)
 	for id := range ids {
-		go streamTweet(api,id,ids[id],ch)
+		go streamTweet(api, id, ids[id], ch)
 	}
 	fmt.Println(<-ch)
 }
 
-func fileExport(path,text string) {
+func fileExport(path, text string) {
 
 	file, err := Create("tweets/" + path + ".txt")
 	if err != nil {
@@ -35,7 +35,7 @@ func fileExport(path,text string) {
 
 }
 
-func streamTweet(api *anaconda.TwitterApi, username, idstr string,ch chan string){
+func streamTweet(api *anaconda.TwitterApi, username, idstr string, ch chan string) {
 
 	v := url.Values{}
 	v.Set("follow", idstr)
@@ -50,7 +50,7 @@ func streamTweet(api *anaconda.TwitterApi, username, idstr string,ch chan string
 		case anaconda.Tweet:
 			rep := regexp.MustCompile(`^@.*\s`)
 			if !rep.MatchString(tweet.Text) { // @???で誰かに向けたツイート以外を取得
-				fileExport(username + "/" + idstr,tweet.Text)
+				fileExport(username+"/"+idstr, tweet.Text)
 				fmt.Println(tweet.Text + "from @" + username)
 				fmt.Println("--------")
 			}

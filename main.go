@@ -8,11 +8,6 @@ import (
 	"regexp"
 )
 
-type Tweet struct {
-	id string
-	text string
-}
-
 func main() {
 
 	api := getTwitterApi()

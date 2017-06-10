@@ -1,2 +1,3 @@
 rm -rf ./tweets
-mkdir -p tweets/rinna
+mkdir -p tweets/ms_rinna
+mkdir -p tweets/kawamina_happy

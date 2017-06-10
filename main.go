@@ -5,17 +5,23 @@ import (
 	"github.com/ChimeraCoder/anaconda"
 	"net/url"
 	. "os"
+	"regexp"
 )
 
 func main() {
 
-	streamTweet()
+	api := getTwitterApi()
 
+	var ids map[string]string = make(map[string]string)
+	ids["ms_rinna"] = "3274075003"
+	ids["kinokoruumu416"] = "1662875580"
+
+	streamTweet(api,ids)
 }
 
-func fileExport(filename string,output string) {
+func fileExport(filename string, output string) {
 
-	file, err := Create("tweets/rinna/"+filename+".txt")
+	file, err := Create("tweets/" + filename + ".txt")
 	if err != nil {
 		panic(err)
 	}
@@ -25,32 +31,38 @@ func fileExport(filename string,output string) {
 
 }
 
-func streamTweet() {
-	api := GetTwitterApi()
+func streamTweet(api *anaconda.TwitterApi,ids map[string]string) {
 
-	v := url.Values{}
-	v.Set("follow", "3274075003")
+	for username := range ids{
+		v := url.Values{}
+		v.Set("follow", ids[username])
 
-	stream := api.PublicStreamFilter(v)
+		stream := api.PublicStreamFilter(v)
 
-	fmt.Println("streaming start!")
+		fmt.Println("stream started: @" + username)
 
-	for {
-		x := <-stream.C
-		switch tweet := x.(type) {
-		case anaconda.Tweet:
-			fileExport(tweet.IdStr,tweet.Text + "\n")
-			fmt.Println(tweet.Text)
-			fmt.Println("--------")
-		case anaconda.StatusDeletionNotice:
-			// pass
-		default:
-			fmt.Println("unkown type(%T): %v \n", x, x)
-		}
+		go func(){
+			for {
+				x := <-stream.C
+				switch tweet := x.(type) {
+				case anaconda.Tweet:
+					rep := regexp.MustCompile(`^@.*\s`)
+					if !rep.MatchString(tweet.Text) { // @???で誰かに向けたツイート以外を取得
+						fileExport(username+"/"+tweet.IdStr, tweet.Text+"\n")
+						fmt.Println(tweet.Text)
+						fmt.Println("--------")
+					}
+				default:
+					fmt.Println("unkown type(%T): %v \n", x, x)
+				}
+			}
+		}()
+
 	}
+
 }
 
-func GetTwitterApi() *anaconda.TwitterApi {
+func getTwitterApi() *anaconda.TwitterApi {
 	anaconda.SetConsumerKey(Getenv("TWITTER_CONSUMER_KEY"))
 	anaconda.SetConsumerSecret(Getenv("TWITTER_CONSUMER_SECRET"))
 	api := anaconda.NewTwitterApi(Getenv("TWITTER_ACCESS_TOKEN"), Getenv("TWITTER_ACCESS_TOKEN_SECRET"))

@@ -1,18 +1,18 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/ChimeraCoder/anaconda"
+	"io/ioutil"
+	"log"
 	"net/url"
 	. "os"
 	"regexp"
-	"encoding/json"
-	"io/ioutil"
-	"log"
 )
 
 type User struct {
-	Id string `json:"id"`
+	Id   string `json:"id"`
 	Name string `json:"name"`
 }
 
@@ -25,7 +25,7 @@ func main() {
 	api := getTwitterApi()
 
 	ch := make(chan string)
-	for _,user := range users {
+	for _, user := range users {
 		go streamTweet(api, user.Name, user.Id, ch)
 	}
 	fmt.Println(<-ch)
@@ -37,8 +37,8 @@ func refresh(users []User) {
 		log.Fatal(err)
 	}
 
-	for _,user := range users {
-		if err := MkdirAll("tweets/" + user.Name,0755); err != nil {
+	for _, user := range users {
+		if err := MkdirAll("tweets/"+user.Name, 0755); err != nil {
 			log.Fatal(err)
 		}
 		fmt.Println("create dir tweets/" + user.Name)

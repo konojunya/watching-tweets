@@ -49,7 +49,7 @@ func refresh(users []User) {
 }
 
 func readJson() []User {
-	bytes, err := ioutil.ReadFile("user.json")
+	bytes, err := ioutil.ReadFile("users.json")
 	if err != nil {
 		panic(err)
 	}

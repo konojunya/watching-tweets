@@ -6,28 +6,67 @@ import (
 	"net/url"
 	. "os"
 	"regexp"
+	"encoding/json"
+	"io/ioutil"
+	"log"
 )
+
+type User struct {
+	Id string `json:"id"`
+	Name string `json:"name"`
+}
 
 func main() {
 
+	users := readJson()
+
+	refresh(users)
+
 	api := getTwitterApi()
 
-	var ids map[string]string = make(map[string]string)
-	ids["ms_rinna"] = "3274075003"
-	ids["kawamina_happy"] = "726052257121214468"
-
 	ch := make(chan string)
-	for id := range ids {
-		go streamTweet(api, id, ids[id], ch)
+	for _,user := range users {
+		go streamTweet(api, user.Name, user.Id, ch)
 	}
 	fmt.Println(<-ch)
+}
+
+func refresh(users []User) {
+
+	if err := RemoveAll("tweets"); err != nil {
+		log.Fatal(err)
+	}
+
+	for _,user := range users {
+		if err := MkdirAll("tweets/" + user.Name,0755); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("create dir tweets/" + user.Name)
+	}
+
+	fmt.Println("\nProject is refreshed!\n\n")
+
+}
+
+func readJson() []User {
+	bytes, err := ioutil.ReadFile("user.json")
+	if err != nil {
+		panic(err)
+	}
+
+	var users []User
+	if err := json.Unmarshal(bytes, &users); err != nil {
+		panic(err)
+	}
+
+	return users
 }
 
 func fileExport(path, text string) {
 
 	file, err := Create("tweets/" + path + ".txt")
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	defer file.Close()
 
@@ -50,12 +89,12 @@ func streamTweet(api *anaconda.TwitterApi, username, idstr string, ch chan strin
 		case anaconda.Tweet:
 			rep := regexp.MustCompile(`^@.*\s`)
 			if !rep.MatchString(tweet.Text) { // @???で誰かに向けたツイート以外を取得
-				fileExport(username+"/"+idstr, tweet.Text)
+				fileExport(username+"/"+tweet.IdStr, tweet.Text)
 				fmt.Println(tweet.Text + "from @" + username)
 				fmt.Println("--------")
 			}
 		default:
-			fmt.Println("unkown type(%T): %v \n", x, x)
+			fmt.Printf("unkown type(%T): %v \n", x, x)
 			ch <- "end"
 		}
 	}

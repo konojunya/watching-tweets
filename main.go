@@ -9,6 +9,7 @@ import (
 	"net/url"
 	. "os"
 	"regexp"
+	"os/user"
 )
 
 type User struct {
@@ -20,7 +21,7 @@ func main() {
 
 	users := readJson()
 
-	refresh(users)
+	refresh()
 
 	api := getTwitterApi()
 
@@ -31,17 +32,14 @@ func main() {
 	fmt.Println(<-ch)
 }
 
-func refresh(users []User) {
+func refresh() {
 
 	if err := RemoveAll("../tweets"); err != nil {
 		log.Fatal(err)
 	}
 
-	for _, user := range users {
-		if err := MkdirAll("../tweets/"+user.Name, 0755); err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println("create dir tweets/" + user.Name)
+	if err := MkdirAll("../tweets", 0755); err != nil {
+		log.Fatal(err)
 	}
 
 	fmt.Println("\nProject is refreshed!\n\n")
@@ -89,7 +87,7 @@ func streamTweet(api *anaconda.TwitterApi, username, idstr string, ch chan strin
 		case anaconda.Tweet:
 			rep := regexp.MustCompile(`^@.*\s`)
 			if !rep.MatchString(tweet.Text) { // @???で誰かに向けたツイート以外を取得
-				fileExport(username+"/"+tweet.IdStr, tweet.Text)
+				fileExport(username+"-"+tweet.IdStr, tweet.Text)
 				fmt.Println(tweet.Text + "from @" + username)
 				fmt.Println("--------")
 			}

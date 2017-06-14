@@ -62,7 +62,8 @@ func readJson() []User {
 
 	var users []User
 	if err := json.Unmarshal(bytes, &users); err != nil {
-		panic(err)
+		fmt.Println("jsonをアンマーシャルできませんでした。\nuser.jsonの形式を確認してください。")
+		Exit(0)
 	}
 
 	return users
@@ -72,7 +73,8 @@ func fileExport(path, text string) {
 
 	file, err := Create("../tweets/" + path + ".txt")
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println("テキストファイルを作成できませんでした。\n" + "tweets/" + path + ".txt")
+		Exit(0)
 	}
 	defer file.Close()
 

@@ -33,12 +33,12 @@ func main() {
 
 func refresh(users []User) {
 
-	if err := RemoveAll("tweets"); err != nil {
+	if err := RemoveAll("../tweets"); err != nil {
 		log.Fatal(err)
 	}
 
 	for _, user := range users {
-		if err := MkdirAll("tweets/"+user.Name, 0755); err != nil {
+		if err := MkdirAll("../tweets/"+user.Name, 0755); err != nil {
 			log.Fatal(err)
 		}
 		fmt.Println("create dir tweets/" + user.Name)
@@ -64,7 +64,7 @@ func readJson() []User {
 
 func fileExport(path, text string) {
 
-	file, err := Create("tweets/" + path + ".txt")
+	file, err := Create("../tweets/" + path + ".txt")
 	if err != nil {
 		log.Fatal(err)
 	}

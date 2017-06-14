@@ -9,7 +9,6 @@ import (
 	"net/url"
 	. "os"
 	"regexp"
-	"os/user"
 )
 
 type User struct {
@@ -47,7 +46,7 @@ func refresh() {
 }
 
 func readJson() []User {
-	bytes, err := ioutil.ReadFile("users.json")
+	bytes, err := ioutil.ReadFile("/Users/kounojunya/dev/hobby/jk_analysis/watching-tweets/users.json")
 	if err != nil {
 		panic(err)
 	}

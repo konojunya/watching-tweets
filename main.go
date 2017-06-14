@@ -48,7 +48,16 @@ func refresh() {
 func readJson() []User {
 	bytes, err := ioutil.ReadFile("/Users/kounojunya/dev/hobby/jk_analysis/watching-tweets/users.json")
 	if err != nil {
-		panic(err)
+		fmt.Println("\nuser.jsonが存在しません。\n次のフォーマットに沿って作成してください。")
+		format := `
+[
+	{
+		"id": "twitter user id str",
+		"name": "twitter screen_name"
+	}
+]`
+		fmt.Println(format)
+		Exit(0)
 	}
 
 	var users []User
